@@ -1,27 +1,26 @@
 VERSION 5.00
-Begin VB.Form Formmain 
+Begin VB.Form Form1 
    BackColor       =   &H80000016&
    Caption         =   "MainForm"
-   ClientHeight    =   660
+   ClientHeight    =   3600
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   1920
+   ClientWidth     =   4215
    LinkTopic       =   "Form1"
-   ScaleHeight     =   660
-   ScaleWidth      =   1920
+   ScaleHeight     =   3600
+   ScaleWidth      =   4215
    StartUpPosition =   3  '窗口缺省
    Begin VB.CommandButton Commandpause 
       Appearance      =   0  'Flat
       Caption         =   "空格键暂停"
-      Height          =   375
-      Left            =   600
+      Height          =   615
+      Left            =   120
       TabIndex        =   1
-      Top             =   120
-      Width           =   1095
+      Top             =   2880
+      Width           =   3975
    End
    Begin VB.Timer Timer1 
-      Interval        =   500
-      Left            =   600
+      Left            =   3600
       Top             =   120
    End
    Begin VB.Label Label 
@@ -34,7 +33,7 @@ Begin VB.Form Formmain
       Width           =   375
    End
 End
-Attribute VB_Name = "Formmain"
+Attribute VB_Name = "Form1"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
@@ -57,7 +56,6 @@ Private Sub Commandpause_Click()
     Else
         forward = forwardlast
     End If
-    'Debug.Print forward; forwardlast; pausei
 End Sub
 
 Private Sub Commandpause_KeyDown(KeyCode As Integer, Shift As Integer)
@@ -74,25 +72,27 @@ End Sub
 Sub initial()
     Dim speed As Integer
     Randomize
-    row = InputBox("输入行数/列数", "Row/Column Input", 15)
-    'row = 15
+    row = Int(Formpre.Textgrid.Text)
     
     Form1.Width = Label(0).Left + (Label(0).Width + 15) * (row + 1)
     Form1.Height = Label(0).Top + (Label(0).Height + 15) * (row + 1) + 1300
+    
     Form1.Top = 0.5 * Screen.Height - 0.5 * Form1.Height
     Form1.Left = 0.5 * Screen.Width - 0.5 * Form1.Width
+    
     Commandpause.Left = 100
     Commandpause.Width = (Label(0).Width + 15) * row - 15
     Commandpause.Top = Label(0).Top + (Label(0).Height + 15) * row + 20
     Commandpause.Height = 1000
     Call caboccur
-    lengthini = InputBox("输入初始长度格数", "Initial Length Input", 4)
+    lengthini = Int(Formpre.Textlength.Text)
     lengthrec = lengthini
-    'lengthini = 5
 
-    speed = InputBox("输入速度值(0-100,100最快,0最慢" & vbCrLf & "千万不要尝试100,不要问为什么", "", 80)
-    Timer1.Interval = Int(-9.9 * speed + 1000)
-    'Timer1.Interval = 500
+    speed = Formpre.HScrollspeed.Value
+    Timer1.Interval = Int(-90 * speed + 1000)
+    
+    Unload Formpre
+    
     Call ini
     Call goalgeneral
     
@@ -104,13 +104,13 @@ Sub ini()
     Form1.Cls
     For j = 0 To row - 1
         For i = 0 To row - 1
-            Label(10 * j + i).BackColor = &H80000000
+            Label(row * j + i).BackColor = &H80000000
         Next i
     Next j
     
     i = Int(Rnd() * 2)
     If i = 0 Then
-        posinix = Int(Rnd() * (row - 3 - lengthini)) + 2
+        posinix = Int(Rnd() * (row - lengthini - 1)) + 1
         posiniy = Int(Rnd() * row)
         For i = 1 To lengthini
             ReDim Preserve pos(i)
@@ -120,7 +120,7 @@ Sub ini()
         forward = "left"
     Else
         posinix = Int(Rnd() * row)
-        posiniy = Int(Rnd() * (row - 3 - lengthini)) + 2
+        posiniy = Int(Rnd() * (row - lengthini - 1)) + 1
         For i = 1 To lengthini
             ReDim Preserve pos(i)
             pos(i) = posiniy * row + posinix + (i - 1) * row
@@ -128,8 +128,6 @@ Sub ini()
         Next i
         forward = "up"
     End If
-    
-    'Debug.Print pos(1); pos(2); pos(3); pos(4)
 End Sub
 
 Sub goalgeneral()
@@ -149,7 +147,6 @@ Function goalgeneraljudge(goalposnum As Integer) As Boolean
 End Function
 
 Sub caboccur()
-    'Label(0).Caption = 0
     j = 0
     For i = 1 To row - 1
         Load Label(i + j * row)
@@ -157,7 +154,6 @@ Sub caboccur()
         Label(i + j * row).Left = Label(i + j * row - 1).Left + Label(i + j * row - 1).Width + 15
         Label(i + j * row).BackColor = Label(i + j * row - 1).BackColor
         Label(i + j * row).Visible = True
-        'Label(i + j * row).Caption = i + j * row
     Next i
     For j = 1 To row - 1
         Load Label(j * row)
@@ -165,26 +161,22 @@ Sub caboccur()
         Label(j * row).Top = Label((j - 1) * row).Top + Label((j - 1) * row).Height + 15
         Label(j * row).BackColor = Label((j - 1) * row).BackColor
         Label(j * row).Visible = True
-        'Label(j * row).Caption = j * row
         For i = 1 To row - 1
             Load Label(i + j * row)
             Label(i + j * row).Top = Label(i + j * row - 1).Top
             Label(i + j * row).Left = Label(i + j * row - 1).Left + Label(i + j * row - 1).Width + 15
             Label(i + j * row).BackColor = Label(i + j * row - 1).BackColor
             Label(i + j * row).Visible = True
-            'Label(i + j * row).Caption = i + j * row
         Next i
     Next j
 End Sub
 
 Private Sub Timer1_Timer()
     forwardnum = forwardval(forward)
-    'Debug.Print forwardlast; forward
     If forwardnum + forwardlastnum = 0 Then forward = forwardlast
     Call forwardmove
     If forward <> "" Then forwardlast = forward
     forwardlastnum = forwardval(forwardlast)
-    'Debug.Print pos(1); pos(2); pos(3); pos(4)
 End Sub
 
 Sub boundjudge()
@@ -220,6 +212,7 @@ Function forwardval(forward As String) As Integer
 End Function
 
 Sub forwardmove()
+    Call fullcheck
     If forward = "left" Then
         Call boundjudge
         If pos(1) - 1 <> goalposnum Then
@@ -311,7 +304,7 @@ Sub selfeat()
     For i = 2 To lengthini
         If pos(1) = pos(i) Then
             Label(pos(1)).BackColor = RGB(255, 0, 0)
-            MsgBox ("咬到自己,卒" & vbCrLf & "这都可以……SA11")
+            MsgBox ("咬到自己,卒" & vbCrLf & "这都可以......")
             Call refreshcode
             Exit For
         End If
@@ -328,4 +321,11 @@ Sub refreshcode()
     lengthini = lengthrec
     Call ini
     Call goalgeneral
+End Sub
+
+Sub fullcheck()
+    If lengthini = row * row Then
+        MsgBox "已经全屏"
+        Call refreshcode
+    End If
 End Sub
